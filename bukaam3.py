@@ -59,9 +59,9 @@ class Game:
             if event.type == pygame.QUIT:
                 self.terminate_game()
             
-            if event.type == pygame.MOUSEBUTTONDOWN:
+            if event.type == pygame.MOUSEBUTTONUP:
                 if self.phase  == False: # in phase B
-                    if self.board.location(self.mouse_pos).occupant != None:
+                    if self.board.location(self.mouse_pos[0],self.mouse_pos[1]).occupant != None:
                         self.selected_piece = self.mouse_pos
                     elif self.selected_piece != None  and self.mouse_pos in self.board.legal_moves(self.selected_piece):
                         
@@ -78,10 +78,10 @@ class Game:
                             self.end_turn()
                     
                 if self.phase == True: # in phase A
-                    if self.board.location(self.mouse_pos).occupant != None and self.default_piece != None and self.default_piece.color == self.turn :
+                    if self.board.location(self.mouse_pos[0],self.mouse_pos[1]).occupant != None and self.default_piece != None and self.default_piece.color == self.turn :
 
                         while len(pebbles) != 0:
-                            self.put_pebble(self.default_piece, self.mouse_pos)
+                            self.put_pebble(self.default_piece, self.mouse_pos[0],self.mouse_pos[1])
                             
                             del self.pebbles[0]
                             self.default_piece = self.pebbles[0]
@@ -195,7 +195,7 @@ class Graphics:
                 pygame.draw.rect(
                     self.screen, board[i][j].color,
                                 (i * self.square_size, j*self.square_size, 
-                                  self.square_size,self.square_size))
+                                  self.square_size,self.square_size),)
             
     def draw_board_pieces(self,board):
         """
@@ -233,7 +233,7 @@ class Graphics:
         
         """
         for square in squares:
-            pygame.draw.rect(self.screen ,HIGH, (square[0] * self.square_size,
+            pygame.draw.circle(self.screen ,HIGH, (square[0] * self.square_size,
                                                  square[1] * self.square_size ,
                                                  
                                                  self.square_size,
@@ -243,7 +243,7 @@ class Graphics:
     
     
         if origin != None:
-            pgame.draw.rect(self.screen, HIGH, (origin[0] * self.square_size,
+            pgame.draw.circle(self.screen, HIGH, (origin[0] * self.square_size,
                                                 origin[1] * self.square_size,
                                                 self.square_size,
                                                 self.square_size))
@@ -269,13 +269,14 @@ class Board:
         """
         # initialize empty squares and put them in a matrix 
         
-        matrix = [6* [None] for i in range(6)] 
-        
-        
+        matrix = [ [None]*6 for i in range(6)] 
+
+
         for i in range(6):
             for j in range(6):
-                matrix[i][j] = Square(WHITE)
+                matrix[i][j] = Square(GREY)
                 
+
         return matrix
         
         
@@ -312,7 +313,7 @@ class Board:
         """
         Takes a set of coordinates (x,y) and returns self.matrix[x][y]
         """
-        return self.matrix[x][y]
+        return self.matrix[int(x)][int(y)]
     
     def blind_legal_moves(self,x,y):
         """
@@ -381,12 +382,12 @@ class Board:
             
             if phase == False:# in phaseB 
                 if self.on_board(move):
-                    if self.location(move).occupant == None:
+                    if self.location(move[0],move[1]).occupant == None:
                         legal_moves.append(move)
                         
             else:# in phaseA
                 for move in blind_legal_moves:
-                    if self.on_board(move) and self.location(move).occupant != None:
+                    if self.on_board(move) and self.location(move[0],move[1]).occupant != None:
                         legal_moves.append(move)
                         
             
@@ -436,6 +437,7 @@ class Square:
     def __init__(self,color,occupant=None):
         self.occupant = occupant # occupant is a square object
         self.color = color # either BLACK or WHITE
+        self.square_background =  pygame.image.load("pit.png")
     
     
         
